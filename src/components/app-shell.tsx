@@ -6,8 +6,10 @@ import {
   Boxes,
   BrainCircuit,
   Building2,
+  Check,
   ChevronDown,
   Command,
+  LayoutDashboard,
   Network,
   RadioTower,
   ScrollText,
@@ -17,7 +19,9 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
+import { type ReactNode, useState } from "react";
+
+import { useWorkspace, type WorkspaceSelection } from "@/components/workspace-provider";
 
 type NavigationItem = {
   label: string;
@@ -94,6 +98,117 @@ function SidebarLink({ item }: { item: NavigationItem }) {
   );
 }
 
+function WorkspaceSwitcher({ compact = false }: { compact?: boolean }) {
+  const {
+    selection,
+    selectWorkspace,
+    organizations,
+    selectedOrganization,
+  } = useWorkspace();
+  const [open, setOpen] = useState(false);
+  const currentLabel = selectedOrganization?.shortName ?? "Portfolio overview";
+
+  function chooseWorkspace(nextSelection: WorkspaceSelection) {
+    selectWorkspace(nextSelection);
+    setOpen(false);
+  }
+
+  return (
+    <div className={`relative ${compact ? "lg:hidden" : "hidden lg:block"}`}>
+      <button
+        type="button"
+        className={
+          compact
+            ? "flex size-9 items-center justify-center rounded-xl border border-line bg-surface text-brand shadow-sm"
+            : "flex items-center gap-3 rounded-xl border border-line bg-surface px-3 py-2 text-left shadow-sm transition hover:border-[#bdcdd1]"
+        }
+        aria-label={compact ? `Current workspace: ${currentLabel}` : "Current workspace"}
+        aria-expanded={open}
+        onClick={() => setOpen((value) => !value)}
+      >
+        <span
+          className={`flex items-center justify-center bg-brand-soft text-brand-strong ${
+            compact ? "size-7 rounded-lg" : "size-8 rounded-lg"
+          }`}
+        >
+          {selection === "portfolio" ? (
+            <LayoutDashboard aria-hidden="true" className="size-4" />
+          ) : (
+            <Building2 aria-hidden="true" className="size-4" />
+          )}
+        </span>
+        {!compact ? (
+          <>
+            <span className="min-w-36">
+              <span className="block text-[10px] font-semibold uppercase tracking-[0.15em] text-muted">
+                {selection === "portfolio" ? "MSP command" : "Tenant workspace"}
+              </span>
+              <span className="block text-sm font-semibold text-ink">{currentLabel}</span>
+            </span>
+            <ChevronDown
+              aria-hidden="true"
+              className={`size-4 text-muted transition ${open ? "rotate-180" : ""}`}
+            />
+          </>
+        ) : null}
+      </button>
+
+      {open ? (
+        <div className="absolute right-0 top-[calc(100%+10px)] z-50 w-72 overflow-hidden rounded-2xl border border-line bg-surface p-2 shadow-[0_24px_70px_rgba(7,25,35,0.2)] lg:left-0 lg:right-auto">
+          <p className="px-3 pb-2 pt-2 text-[10px] font-bold uppercase tracking-[0.18em] text-muted">
+            Switch workspace
+          </p>
+          <button
+            type="button"
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition hover:bg-[#f2f7f7]"
+            onClick={() => chooseWorkspace("portfolio")}
+          >
+            <span className="flex size-9 items-center justify-center rounded-xl bg-ink text-white">
+              <LayoutDashboard aria-hidden="true" className="size-4" />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-sm font-semibold text-ink">Portfolio overview</span>
+              <span className="block text-xs text-muted">All authorised organisations</span>
+            </span>
+            {selection === "portfolio" ? (
+              <Check aria-hidden="true" className="size-4 text-brand" />
+            ) : null}
+          </button>
+
+          <div className="my-1 border-t border-line" />
+          {organizations.map((organization) => (
+            <button
+              key={organization.id}
+              type="button"
+              className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition hover:bg-[#f2f7f7]"
+              onClick={() => chooseWorkspace(organization.id)}
+            >
+              <span className="flex size-9 items-center justify-center rounded-xl bg-brand-soft text-xs font-bold text-brand-strong">
+                {organization.shortName
+                  .split(" ")
+                  .map((word) => word[0])
+                  .slice(0, 2)
+                  .join("")}
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-sm font-semibold text-ink">
+                  {organization.shortName}
+                </span>
+                <span className="block text-xs capitalize text-muted">
+                  {organization.industry.toLowerCase().replaceAll("_", " ")}
+                </span>
+              </span>
+              {selection === organization.id ? (
+                <Check aria-hidden="true" className="size-4 text-brand" />
+              ) : null}
+            </button>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
 
@@ -151,26 +266,10 @@ export function AppShell({ children }: { children: ReactNode }) {
               </span>
             </Link>
 
-            <button
-              type="button"
-              className="hidden items-center gap-3 rounded-xl border border-line bg-surface px-3 py-2 text-left shadow-sm transition hover:border-[#bdcdd1] lg:flex"
-              aria-label="Current demonstration organisation"
-            >
-              <span className="flex size-8 items-center justify-center rounded-lg bg-brand-soft text-brand-strong">
-                <Building2 aria-hidden="true" className="size-4" />
-              </span>
-              <span>
-                <span className="block text-[10px] font-semibold uppercase tracking-[0.15em] text-muted">
-                  Demo workspace
-                </span>
-                <span className="block text-sm font-semibold text-ink">
-                  Meridian Logistics
-                </span>
-              </span>
-              <ChevronDown aria-hidden="true" className="size-4 text-muted" />
-            </button>
+            <WorkspaceSwitcher />
 
             <div className="flex items-center gap-3">
+              <WorkspaceSwitcher compact />
               <div className="hidden items-center gap-2 rounded-full border border-[#cbe7df] bg-[#e7f7f2] px-3 py-1.5 text-xs font-semibold text-brand-strong sm:flex">
                 <span className="signal-dot size-1.5 rounded-full bg-brand" />
                 Demo environment

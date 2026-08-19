@@ -53,10 +53,16 @@ The AI layer prepares evidence-backed recommendations. A deterministic policy
 engine and an authorised human must approve consequential automation. Every
 approval and runbook execution is recorded in an audit trail.
 
+## Cloud delivery rule
+
+AWS integrations will be represented as reviewed Terraform infrastructure as
+code. The project will not depend on manually created console resources, and no
+chargeable infrastructure is provisioned by default.
+
 ## Status
 
-Task 3 complete: a validated, tenant-isolated domain now covers organisations,
-services, assets, SRE and SOC signals, incidents, explainable AI evidence,
-approvals, simulated automation, infrastructure posture, and audit events. See
-[the data model](docs/DATA_MODEL.md) for the boundary and scenario design. Task 4
-will connect this data to the company command centre and tenant switcher.
+Task 4 complete: the responsive MSP command centre now supports portfolio and
+tenant views, persistent organisation switching, operational KPIs, company
+posture, business-impact incidents, and interactive service/site visibility.
+See [the data model](docs/DATA_MODEL.md) for the tenant boundary and scenarios.
+Task 5 will deepen the service data into the SRE observability workspace.

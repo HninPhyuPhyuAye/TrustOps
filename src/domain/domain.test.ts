@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { demoData } from "@/data/demo-data";
+import { summarizeOrganization, summarizePortfolio } from "@/domain/dashboard";
 import { DatasetIntegrityError, validateDatasetIntegrity } from "@/domain/integrity";
 import { trustOpsDatasetSchema } from "@/domain/schemas";
 import {
@@ -89,5 +90,35 @@ describe("tenant-aware repository", () => {
     expect(() =>
       repository.getOrganizationSnapshot(healthcareAnalyst, "org-meridian"),
     ).toThrow(TenantAccessError);
+  });
+});
+
+describe("command centre summaries", () => {
+  it("calculates tenant health without mixing organisations", () => {
+    const snapshot = repository.getOrganizationSnapshot(
+      healthcareAnalyst,
+      "org-harbourcare",
+    );
+    const summary = summarizeOrganization(snapshot);
+
+    expect(summary.serviceCount).toBe(3);
+    expect(summary.servicesAtRisk).toBe(1);
+    expect(summary.activeIncidents).toBe(1);
+    expect(summary.activeSecuritySignals).toBe(1);
+  });
+
+  it("aggregates only the authorised organisation summaries", () => {
+    const summaries = repository.listOrganizations(mspOperator).map((organization) =>
+      summarizeOrganization(
+        repository.getOrganizationSnapshot(mspOperator, organization.id),
+      ),
+    );
+    const portfolio = summarizePortfolio(summaries);
+
+    expect(portfolio.organizationCount).toBe(3);
+    expect(portfolio.organizationsNeedingAttention).toBe(2);
+    expect(portfolio.activeIncidents).toBe(2);
+    expect(portfolio.servicesAtRisk).toBe(3);
+    expect(portfolio.pendingApprovals).toBe(2);
   });
 });

@@ -73,6 +73,8 @@ observability platform. It is a credible architectural and workflow prototype.
 - Add CI, Docker, environment examples, and security checks.
 - Add Terraform reference modules and an AWS architecture document without
   creating chargeable infrastructure by default.
+- Define every AWS integration through reviewed Terraform configuration; do not
+  rely on manually created console resources for the portfolio architecture.
 
 ### Task 10: Release and portfolio evidence
 
