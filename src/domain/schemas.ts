@@ -59,6 +59,46 @@ export const serviceSchema = tenantEntity.extend({
   saturationPercent: z.number().min(0).max(100),
 });
 
+export const serviceMetricPointSchema = tenantEntity.extend({
+  serviceId: id,
+  observedAt: z.iso.datetime(),
+  availabilityPercent: z.number().min(0).max(100),
+  latencyP95Ms: z.number().nonnegative(),
+  trafficPerMinute: z.number().int().nonnegative(),
+  errorRatePercent: z.number().nonnegative(),
+  saturationPercent: z.number().min(0).max(100),
+});
+
+export const deploymentSchema = tenantEntity.extend({
+  serviceId: id,
+  version: z.string().min(1),
+  deployedAt: z.iso.datetime(),
+  deployedBy: z.string().min(2),
+  status: z.enum(["SUCCEEDED", "FAILED", "ROLLED_BACK"]),
+  changeSummary: z.string().min(5),
+});
+
+export const telemetryEventSchema = tenantEntity.extend({
+  serviceId: id,
+  occurredAt: z.iso.datetime(),
+  kind: z.enum(["LOG", "TRACE"]),
+  level: z.enum(["DEBUG", "INFO", "WARN", "ERROR"]),
+  source: z.string().min(2),
+  message: z.string().min(5),
+  traceId: z.string().optional(),
+  durationMs: z.number().nonnegative().optional(),
+});
+
+export const recoveryCheckSchema = tenantEntity.extend({
+  serviceId: id,
+  runbookId: id.optional(),
+  name: z.string().min(3),
+  category: z.enum(["BACKUP", "FAILOVER", "RUNBOOK", "CAPACITY"]),
+  status: z.enum(["PASS", "WARN", "FAIL"]),
+  lastVerifiedAt: z.iso.datetime(),
+  detail: z.string().min(5),
+});
+
 export const assetSchema = tenantEntity.extend({
   name: z.string().min(2),
   kind: z.enum([
@@ -199,6 +239,10 @@ export const trustOpsDatasetSchema = z.object({
   organizations: z.array(organizationSchema).min(1),
   sites: z.array(siteSchema),
   services: z.array(serviceSchema),
+  serviceMetricPoints: z.array(serviceMetricPointSchema),
+  deployments: z.array(deploymentSchema),
+  telemetryEvents: z.array(telemetryEventSchema),
+  recoveryChecks: z.array(recoveryCheckSchema),
   assets: z.array(assetSchema),
   signals: z.array(signalSchema),
   incidents: z.array(incidentSchema),
@@ -217,6 +261,10 @@ export type Severity = z.infer<typeof severitySchema>;
 export type Organization = z.infer<typeof organizationSchema>;
 export type Site = z.infer<typeof siteSchema>;
 export type Service = z.infer<typeof serviceSchema>;
+export type ServiceMetricPoint = z.infer<typeof serviceMetricPointSchema>;
+export type Deployment = z.infer<typeof deploymentSchema>;
+export type TelemetryEvent = z.infer<typeof telemetryEventSchema>;
+export type RecoveryCheck = z.infer<typeof recoveryCheckSchema>;
 export type Asset = z.infer<typeof assetSchema>;
 export type Signal = z.infer<typeof signalSchema>;
 export type Incident = z.infer<typeof incidentSchema>;

@@ -61,8 +61,9 @@ chargeable infrastructure is provisioned by default.
 
 ## Status
 
-Task 4 complete: the responsive MSP command centre now supports portfolio and
-tenant views, persistent organisation switching, operational KPIs, company
-posture, business-impact incidents, and interactive service/site visibility.
-See [the data model](docs/DATA_MODEL.md) for the tenant boundary and scenarios.
-Task 5 will deepen the service data into the SRE observability workspace.
+Task 5 complete: the tenant-aware SRE workspace now connects golden signals,
+SLO and error-budget burn, time-series telemetry, deployments, logs, traces,
+business impact, recovery readiness, and infrastructure drift. All telemetry is
+deterministic demonstration data. See [the observability model](docs/OBSERVABILITY.md)
+and [the data model](docs/DATA_MODEL.md) for the operating logic and tenant
+boundary. Task 6 will add the SOC and cyber-monitoring workspace.

@@ -1,6 +1,73 @@
 import { validateDatasetIntegrity } from "@/domain/integrity";
 import { trustOpsDatasetSchema } from "@/domain/schemas";
 
+const metricTimes = [
+  "2026-08-20T00:30:00Z",
+  "2026-08-20T00:45:00Z",
+  "2026-08-20T01:00:00Z",
+  "2026-08-20T01:15:00Z",
+  "2026-08-20T01:30:00Z",
+  "2026-08-20T01:45:00Z",
+  "2026-08-20T02:00:00Z",
+  "2026-08-20T02:15:00Z",
+] as const;
+
+const metricProfiles = [
+  ["org-meridian", "svc-meridian-fleet", 99.72, 842, 1640, 2.8, 78, true],
+  ["org-meridian", "svc-meridian-shipment", 99.61, 1280, 2380, 4.6, 84, true],
+  ["org-meridian", "svc-meridian-scanning", 99.97, 184, 920, 0.12, 42, false],
+  ["org-harbourcare", "svc-harbourcare-booking", 99.96, 238, 780, 0.18, 37, false],
+  ["org-harbourcare", "svc-harbourcare-queue", 99.78, 695, 1160, 1.9, 71, true],
+  ["org-harbourcare", "svc-harbourcare-records", 99.995, 312, 310, 0.04, 33, false],
+  ["org-northstar", "svc-northstar-portal", 99.98, 205, 540, 0.09, 29, false],
+  ["org-northstar", "svc-northstar-documents", 99.93, 348, 390, 0.16, 45, false],
+  ["org-northstar", "svc-northstar-identity", 99.999, 94, 260, 0.01, 21, false],
+] as const;
+
+const incidentCurve = [0.18, 0.22, 0.3, 0.44, 0.68, 1, 0.86, 0.74];
+const stableCurve = [0.86, 0.92, 0.88, 0.95, 0.9, 1, 0.93, 0.96];
+
+const generatedMetricPoints = metricProfiles.flatMap(
+  (
+    [
+      organizationId,
+      serviceId,
+      availability,
+      latency,
+      traffic,
+      errors,
+      saturation,
+      degraded,
+    ],
+    profileIndex,
+  ) => {
+    const curve = degraded ? incidentCurve : stableCurve;
+
+    return metricTimes.map((observedAt, pointIndex) => {
+      const factor = curve[(pointIndex + profileIndex) % curve.length] ?? 1;
+      const availabilityRecovery = degraded ? (1 - factor) * 0.24 : (1 - factor) * 0.025;
+
+      return {
+        id: `metric-${serviceId}-${pointIndex + 1}`,
+        organizationId,
+        serviceId,
+        observedAt,
+        availabilityPercent: Number(
+          Math.min(100, availability + availabilityRecovery).toFixed(3),
+        ),
+        latencyP95Ms: Math.round(latency * (degraded ? 0.45 + factor * 0.55 : factor)),
+        trafficPerMinute: Math.round(traffic * (0.82 + factor * 0.18)),
+        errorRatePercent: Number(
+          (errors * (degraded ? 0.3 + factor * 0.7 : factor)).toFixed(2),
+        ),
+        saturationPercent: Number(
+          Math.min(100, saturation * (degraded ? 0.55 + factor * 0.45 : factor)).toFixed(1),
+        ),
+      };
+    });
+  },
+);
+
 const rawDemoData = {
   organizations: [
     {
@@ -255,6 +322,214 @@ const rawDemoData = {
       latencyP95Ms: 94,
       errorRatePercent: 0.01,
       saturationPercent: 21,
+    },
+  ],
+  serviceMetricPoints: generatedMetricPoints,
+  deployments: [
+    {
+      id: "deploy-meridian-shipment-184",
+      organizationId: "org-meridian",
+      serviceId: "svc-meridian-shipment",
+      version: "shipment-api@1.8.4",
+      deployedAt: "2026-08-20T01:32:00Z",
+      deployedBy: "release-bot",
+      status: "SUCCEEDED",
+      changeSummary: "Updated database connection policy and shipment cache client.",
+    },
+    {
+      id: "deploy-meridian-fleet-311",
+      organizationId: "org-meridian",
+      serviceId: "svc-meridian-fleet",
+      version: "fleet-core@3.1.1",
+      deployedAt: "2026-08-19T09:15:00Z",
+      deployedBy: "transport-platform",
+      status: "SUCCEEDED",
+      changeSummary: "Improved dispatch batching and route validation.",
+    },
+    {
+      id: "deploy-harbourcare-queue-276",
+      organizationId: "org-harbourcare",
+      serviceId: "svc-harbourcare-queue",
+      version: "queue-consumer@2.7.6",
+      deployedAt: "2026-08-20T01:48:00Z",
+      deployedBy: "clinic-operations",
+      status: "SUCCEEDED",
+      changeSummary: "Raised event batch size for peak appointment hours.",
+    },
+    {
+      id: "deploy-northstar-portal-523",
+      organizationId: "org-northstar",
+      serviceId: "svc-northstar-portal",
+      version: "client-portal@5.2.3",
+      deployedAt: "2026-08-19T07:30:00Z",
+      deployedBy: "client-experience",
+      status: "SUCCEEDED",
+      changeSummary: "Added engagement summary export and accessibility fixes.",
+    },
+  ],
+  telemetryEvents: [
+    {
+      id: "telemetry-meridian-log-01",
+      organizationId: "org-meridian",
+      serviceId: "svc-meridian-shipment",
+      occurredAt: "2026-08-20T01:42:18Z",
+      kind: "LOG",
+      level: "ERROR",
+      source: "shipment-api",
+      message: "Database connection rejected by updated access policy.",
+      traceId: "trc-mrd-7fe2a1",
+    },
+    {
+      id: "telemetry-meridian-trace-01",
+      organizationId: "org-meridian",
+      serviceId: "svc-meridian-shipment",
+      occurredAt: "2026-08-20T01:42:21Z",
+      kind: "TRACE",
+      level: "WARN",
+      source: "GET /shipments/:id",
+      message: "Database span consumed 91 percent of request duration.",
+      traceId: "trc-mrd-7fe2a1",
+      durationMs: 1264,
+    },
+    {
+      id: "telemetry-meridian-log-02",
+      organizationId: "org-meridian",
+      serviceId: "svc-meridian-fleet",
+      occurredAt: "2026-08-20T01:44:05Z",
+      kind: "LOG",
+      level: "ERROR",
+      source: "fleet-core",
+      message: "Dispatch assignment write failed after three retries.",
+      traceId: "trc-mrd-920cb4",
+    },
+    {
+      id: "telemetry-harbourcare-trace-01",
+      organizationId: "org-harbourcare",
+      serviceId: "svc-harbourcare-queue",
+      occurredAt: "2026-08-20T02:08:12Z",
+      kind: "TRACE",
+      level: "WARN",
+      source: "queue-event-consumer",
+      message: "Event acknowledgement delayed while consumer batch remained saturated.",
+      traceId: "trc-hhc-2aa891",
+      durationMs: 681,
+    },
+    {
+      id: "telemetry-harbourcare-log-01",
+      organizationId: "org-harbourcare",
+      serviceId: "svc-harbourcare-queue",
+      occurredAt: "2026-08-20T02:09:03Z",
+      kind: "LOG",
+      level: "WARN",
+      source: "queue-event-consumer",
+      message: "Retry backlog exceeded the clinic operations warning threshold.",
+      traceId: "trc-hhc-2aa891",
+    },
+    {
+      id: "telemetry-northstar-log-01",
+      organizationId: "org-northstar",
+      serviceId: "svc-northstar-portal",
+      occurredAt: "2026-08-20T02:01:00Z",
+      kind: "LOG",
+      level: "INFO",
+      source: "client-portal",
+      message: "Synthetic client journey completed within objective.",
+    },
+  ],
+  recoveryChecks: [
+    {
+      id: "recovery-meridian-backup",
+      organizationId: "org-meridian",
+      serviceId: "svc-meridian-shipment",
+      runbookId: "runbook-meridian-rollback",
+      name: "Database point-in-time recovery",
+      category: "BACKUP",
+      status: "PASS",
+      lastVerifiedAt: "2026-08-18T03:00:00Z",
+      detail: "Recovery rehearsal completed in 18 minutes.",
+    },
+    {
+      id: "recovery-meridian-runbook",
+      organizationId: "org-meridian",
+      serviceId: "svc-meridian-shipment",
+      runbookId: "runbook-meridian-rollback",
+      name: "Rollback runbook freshness",
+      category: "RUNBOOK",
+      status: "WARN",
+      lastVerifiedAt: "2026-07-10T02:00:00Z",
+      detail: "Owner review is due before the next production release.",
+    },
+    {
+      id: "recovery-meridian-capacity",
+      organizationId: "org-meridian",
+      serviceId: "svc-meridian-fleet",
+      name: "Peak dispatch capacity",
+      category: "CAPACITY",
+      status: "WARN",
+      lastVerifiedAt: "2026-08-15T04:15:00Z",
+      detail: "Current headroom is below the 30 percent operating target.",
+    },
+    {
+      id: "recovery-harbourcare-failover",
+      organizationId: "org-harbourcare",
+      serviceId: "svc-harbourcare-queue",
+      runbookId: "runbook-harbourcare-restart",
+      name: "Queue consumer failover",
+      category: "FAILOVER",
+      status: "PASS",
+      lastVerifiedAt: "2026-08-12T05:00:00Z",
+      detail: "Secondary consumer resumed events without loss.",
+    },
+    {
+      id: "recovery-harbourcare-runbook",
+      organizationId: "org-harbourcare",
+      serviceId: "svc-harbourcare-queue",
+      runbookId: "runbook-harbourcare-restart",
+      name: "Clinic communications runbook",
+      category: "RUNBOOK",
+      status: "PASS",
+      lastVerifiedAt: "2026-08-14T06:30:00Z",
+      detail: "Reception fallback procedure confirmed at both clinics.",
+    },
+    {
+      id: "recovery-harbourcare-backup",
+      organizationId: "org-harbourcare",
+      serviceId: "svc-harbourcare-records",
+      name: "Clinical record backup policy",
+      category: "BACKUP",
+      status: "FAIL",
+      lastVerifiedAt: "2026-08-20T02:02:00Z",
+      detail: "Retention configuration differs from the approved baseline.",
+    },
+    {
+      id: "recovery-northstar-failover",
+      organizationId: "org-northstar",
+      serviceId: "svc-northstar-portal",
+      name: "Client portal regional failover",
+      category: "FAILOVER",
+      status: "PASS",
+      lastVerifiedAt: "2026-08-11T01:00:00Z",
+      detail: "Synthetic traffic successfully shifted to recovery origin.",
+    },
+    {
+      id: "recovery-northstar-backup",
+      organizationId: "org-northstar",
+      serviceId: "svc-northstar-documents",
+      name: "Document repository restore",
+      category: "BACKUP",
+      status: "PASS",
+      lastVerifiedAt: "2026-08-09T02:30:00Z",
+      detail: "Sample engagement restored with permissions intact.",
+    },
+    {
+      id: "recovery-northstar-capacity",
+      organizationId: "org-northstar",
+      serviceId: "svc-northstar-identity",
+      name: "Identity provider capacity",
+      category: "CAPACITY",
+      status: "PASS",
+      lastVerifiedAt: "2026-08-17T03:45:00Z",
+      detail: "Authentication load test retained 62 percent headroom.",
     },
   ],
   assets: [

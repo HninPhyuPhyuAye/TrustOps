@@ -17,6 +17,10 @@ export type OrganizationSnapshot = {
   organization: Organization;
   sites: TrustOpsDataset["sites"];
   services: TrustOpsDataset["services"];
+  serviceMetricPoints: TrustOpsDataset["serviceMetricPoints"];
+  deployments: TrustOpsDataset["deployments"];
+  telemetryEvents: TrustOpsDataset["telemetryEvents"];
+  recoveryChecks: TrustOpsDataset["recoveryChecks"];
   assets: TrustOpsDataset["assets"];
   signals: TrustOpsDataset["signals"];
   incidents: TrustOpsDataset["incidents"];
@@ -65,6 +69,10 @@ export function createTenantRepository(dataset: TrustOpsDataset) {
         organization,
         sites: forTenant(dataset.sites),
         services: forTenant(dataset.services),
+        serviceMetricPoints: forTenant(dataset.serviceMetricPoints),
+        deployments: forTenant(dataset.deployments),
+        telemetryEvents: forTenant(dataset.telemetryEvents),
+        recoveryChecks: forTenant(dataset.recoveryChecks),
         assets: forTenant(dataset.assets),
         signals: forTenant(dataset.signals),
         incidents: forTenant(dataset.incidents),

@@ -4,6 +4,7 @@ import { demoData } from "@/data/demo-data";
 import { summarizeOrganization, summarizePortfolio } from "@/domain/dashboard";
 import { DatasetIntegrityError, validateDatasetIntegrity } from "@/domain/integrity";
 import { trustOpsDatasetSchema } from "@/domain/schemas";
+import { calculateErrorBudgetBurn, summarizeSreWorkspace } from "@/domain/sre";
 import {
   createTenantRepository,
   TenantAccessError,
@@ -68,6 +69,10 @@ describe("tenant-aware repository", () => {
     const collections = [
       snapshot.sites,
       snapshot.services,
+      snapshot.serviceMetricPoints,
+      snapshot.deployments,
+      snapshot.telemetryEvents,
+      snapshot.recoveryChecks,
       snapshot.assets,
       snapshot.signals,
       snapshot.incidents,
@@ -120,5 +125,30 @@ describe("command centre summaries", () => {
     expect(portfolio.activeIncidents).toBe(2);
     expect(portfolio.servicesAtRisk).toBe(3);
     expect(portfolio.pendingApprovals).toBe(2);
+  });
+});
+
+describe("SRE workspace calculations", () => {
+  it("calculates error-budget burn from the service SLO", () => {
+    const meridian = repository.getOrganizationSnapshot(mspOperator, "org-meridian");
+    const shipment = meridian.services.find(
+      (service) => service.id === "svc-meridian-shipment",
+    );
+
+    if (!shipment) throw new Error("Expected shipment service fixture");
+    expect(calculateErrorBudgetBurn(shipment)).toBe(3.9);
+  });
+
+  it("summarises golden signals and recovery readiness per tenant", () => {
+    const healthcare = repository.getOrganizationSnapshot(
+      healthcareAnalyst,
+      "org-harbourcare",
+    );
+    const summary = summarizeSreWorkspace(healthcare);
+
+    expect(summary.serviceCount).toBe(3);
+    expect(summary.servicesAtRisk).toBe(1);
+    expect(summary.trafficPerMinute).toBeGreaterThan(0);
+    expect(summary.recoveryReadiness).toBe(67);
   });
 });

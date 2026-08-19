@@ -46,6 +46,10 @@ export function validateDatasetIntegrity(dataset: TrustOpsDataset): TrustOpsData
   const tenantCollections: Array<[string, TenantRecord[]]> = [
     ["sites", dataset.sites],
     ["services", dataset.services],
+    ["serviceMetricPoints", dataset.serviceMetricPoints],
+    ["deployments", dataset.deployments],
+    ["telemetryEvents", dataset.telemetryEvents],
+    ["recoveryChecks", dataset.recoveryChecks],
     ["assets", dataset.assets],
     ["signals", dataset.signals],
     ["incidents", dataset.incidents],
@@ -87,6 +91,31 @@ export function validateDatasetIntegrity(dataset: TrustOpsDataset): TrustOpsData
     if (asset.siteId) requireTenantReference(issues, asset, "site", asset.siteId, sites);
     if (asset.serviceId) {
       requireTenantReference(issues, asset, "service", asset.serviceId, services);
+    }
+  }
+
+  for (const metric of dataset.serviceMetricPoints) {
+    requireTenantReference(issues, metric, "service", metric.serviceId, services);
+  }
+
+  for (const deployment of dataset.deployments) {
+    requireTenantReference(
+      issues,
+      deployment,
+      "service",
+      deployment.serviceId,
+      services,
+    );
+  }
+
+  for (const event of dataset.telemetryEvents) {
+    requireTenantReference(issues, event, "service", event.serviceId, services);
+  }
+
+  for (const check of dataset.recoveryChecks) {
+    requireTenantReference(issues, check, "service", check.serviceId, services);
+    if (check.runbookId) {
+      requireTenantReference(issues, check, "runbook", check.runbookId, runbooks);
     }
   }
 
