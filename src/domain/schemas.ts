@@ -141,6 +141,71 @@ export const signalSchema = tenantEntity.extend({
   threshold: z.number().optional(),
 });
 
+export const securityDetectionSchema = tenantEntity.extend({
+  signalId: id,
+  assetId: id,
+  tactic: z.enum([
+    "INITIAL_ACCESS",
+    "EXECUTION",
+    "PERSISTENCE",
+    "PRIVILEGE_ESCALATION",
+    "DEFENSE_EVASION",
+    "CREDENTIAL_ACCESS",
+    "DISCOVERY",
+    "LATERAL_MOVEMENT",
+    "COLLECTION",
+    "EXFILTRATION",
+    "IMPACT",
+  ]),
+  techniqueId: z.string().regex(/^T\d{4}(\.\d{3})?$/),
+  technique: z.string().min(3),
+  confidence: z.number().int().min(0).max(100),
+  disposition: z.enum([
+    "UNTRIAGED",
+    "INVESTIGATING",
+    "BENIGN",
+    "TRUE_POSITIVE",
+    "CONTAINED",
+  ]),
+  entity: z.string().min(2),
+  sourceLocation: z.string().min(2),
+  eventCount: z.number().int().positive(),
+  firstSeenAt: z.iso.datetime(),
+  lastSeenAt: z.iso.datetime(),
+});
+
+export const exposureFindingSchema = tenantEntity.extend({
+  assetId: id,
+  title: z.string().min(5),
+  category: z.enum([
+    "VULNERABILITY",
+    "MISCONFIGURATION",
+    "EXCESS_PRIVILEGE",
+    "PUBLIC_EXPOSURE",
+  ]),
+  severity: severitySchema,
+  status: z.enum(["OPEN", "ACCEPTED", "REMEDIATED"]),
+  discoveredAt: z.iso.datetime(),
+  cve: z.string().regex(/^CVE-\d{4}-\d{4,}$/).optional(),
+  remediation: z.string().min(5),
+  controlReferences: z.array(z.string().min(2)).min(1),
+});
+
+export const securityControlSchema = tenantEntity.extend({
+  name: z.string().min(3),
+  category: z.enum([
+    "IDENTITY",
+    "ENDPOINT",
+    "CLOUD",
+    "NETWORK",
+    "DATA_PROTECTION",
+  ]),
+  status: z.enum(["EFFECTIVE", "PARTIAL", "GAP"]),
+  coveragePercent: z.number().int().min(0).max(100),
+  monitoredAssets: z.number().int().nonnegative(),
+  detail: z.string().min(5),
+});
+
 export const incidentSchema = tenantEntity.extend({
   title: z.string().min(3),
   status: z.enum(["INVESTIGATING", "CONTAINED", "MONITORING", "RESOLVED"]),
@@ -245,6 +310,9 @@ export const trustOpsDatasetSchema = z.object({
   recoveryChecks: z.array(recoveryCheckSchema),
   assets: z.array(assetSchema),
   signals: z.array(signalSchema),
+  securityDetections: z.array(securityDetectionSchema),
+  exposureFindings: z.array(exposureFindingSchema),
+  securityControls: z.array(securityControlSchema),
   incidents: z.array(incidentSchema),
   evidence: z.array(evidenceSchema),
   aiInvestigations: z.array(aiInvestigationSchema),
@@ -267,6 +335,9 @@ export type TelemetryEvent = z.infer<typeof telemetryEventSchema>;
 export type RecoveryCheck = z.infer<typeof recoveryCheckSchema>;
 export type Asset = z.infer<typeof assetSchema>;
 export type Signal = z.infer<typeof signalSchema>;
+export type SecurityDetection = z.infer<typeof securityDetectionSchema>;
+export type ExposureFinding = z.infer<typeof exposureFindingSchema>;
+export type SecurityControl = z.infer<typeof securityControlSchema>;
 export type Incident = z.infer<typeof incidentSchema>;
 export type Evidence = z.infer<typeof evidenceSchema>;
 export type AiInvestigation = z.infer<typeof aiInvestigationSchema>;

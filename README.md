@@ -61,9 +61,10 @@ chargeable infrastructure is provisioned by default.
 
 ## Status
 
-Task 5 complete: the tenant-aware SRE workspace now connects golden signals,
-SLO and error-budget burn, time-series telemetry, deployments, logs, traces,
-business impact, recovery readiness, and infrastructure drift. All telemetry is
-deterministic demonstration data. See [the observability model](docs/OBSERVABILITY.md)
-and [the data model](docs/DATA_MODEL.md) for the operating logic and tenant
-boundary. Task 6 will add the SOC and cyber-monitoring workspace.
+Task 6 complete: the SOC workspace now fuses identity, endpoint, cloud, and
+network detections with analyst triage, MITRE-aligned context, attack paths,
+asset exposure, business impact, and preventive-control coverage. All security
+telemetry is deterministic demonstration data. See [the cyber-monitoring model](docs/CYBER_MONITORING.md),
+[the observability model](docs/OBSERVABILITY.md), and [the data model](docs/DATA_MODEL.md)
+for the operating logic and tenant boundary. Task 7 will turn the correlated
+evidence into incident investigations and explainable AI analysis.

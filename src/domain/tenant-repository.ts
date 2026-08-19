@@ -23,6 +23,9 @@ export type OrganizationSnapshot = {
   recoveryChecks: TrustOpsDataset["recoveryChecks"];
   assets: TrustOpsDataset["assets"];
   signals: TrustOpsDataset["signals"];
+  securityDetections: TrustOpsDataset["securityDetections"];
+  exposureFindings: TrustOpsDataset["exposureFindings"];
+  securityControls: TrustOpsDataset["securityControls"];
   incidents: TrustOpsDataset["incidents"];
   evidence: TrustOpsDataset["evidence"];
   aiInvestigations: TrustOpsDataset["aiInvestigations"];
@@ -75,6 +78,9 @@ export function createTenantRepository(dataset: TrustOpsDataset) {
         recoveryChecks: forTenant(dataset.recoveryChecks),
         assets: forTenant(dataset.assets),
         signals: forTenant(dataset.signals),
+        securityDetections: forTenant(dataset.securityDetections),
+        exposureFindings: forTenant(dataset.exposureFindings),
+        securityControls: forTenant(dataset.securityControls),
         incidents: forTenant(dataset.incidents),
         evidence: forTenant(dataset.evidence),
         aiInvestigations: forTenant(dataset.aiInvestigations),

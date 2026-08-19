@@ -4,6 +4,7 @@ import { demoData } from "@/data/demo-data";
 import { summarizeOrganization, summarizePortfolio } from "@/domain/dashboard";
 import { DatasetIntegrityError, validateDatasetIntegrity } from "@/domain/integrity";
 import { trustOpsDatasetSchema } from "@/domain/schemas";
+import { summarizeSocWorkspace } from "@/domain/soc";
 import { calculateErrorBudgetBurn, summarizeSreWorkspace } from "@/domain/sre";
 import {
   createTenantRepository,
@@ -75,6 +76,9 @@ describe("tenant-aware repository", () => {
       snapshot.recoveryChecks,
       snapshot.assets,
       snapshot.signals,
+      snapshot.securityDetections,
+      snapshot.exposureFindings,
+      snapshot.securityControls,
       snapshot.incidents,
       snapshot.evidence,
       snapshot.aiInvestigations,
@@ -109,7 +113,7 @@ describe("command centre summaries", () => {
     expect(summary.serviceCount).toBe(3);
     expect(summary.servicesAtRisk).toBe(1);
     expect(summary.activeIncidents).toBe(1);
-    expect(summary.activeSecuritySignals).toBe(1);
+    expect(summary.activeSecuritySignals).toBe(2);
   });
 
   it("aggregates only the authorised organisation summaries", () => {
@@ -150,5 +154,22 @@ describe("SRE workspace calculations", () => {
     expect(summary.servicesAtRisk).toBe(1);
     expect(summary.trafficPerMinute).toBeGreaterThan(0);
     expect(summary.recoveryReadiness).toBe(67);
+  });
+});
+
+describe("SOC workspace calculations", () => {
+  it("summarises detections, exposure, and controls inside one tenant", () => {
+    const healthcare = repository.getOrganizationSnapshot(
+      healthcareAnalyst,
+      "org-harbourcare",
+    );
+    const summary = summarizeSocWorkspace(healthcare);
+
+    expect(summary.detectionCount).toBe(2);
+    expect(summary.activeDetections).toBe(2);
+    expect(summary.highPriorityDetections).toBe(1);
+    expect(summary.untriagedDetections).toBe(1);
+    expect(summary.openFindings).toBe(2);
+    expect(summary.averageControlCoverage).toBe(79);
   });
 });

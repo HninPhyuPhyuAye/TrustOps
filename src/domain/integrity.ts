@@ -52,6 +52,9 @@ export function validateDatasetIntegrity(dataset: TrustOpsDataset): TrustOpsData
     ["recoveryChecks", dataset.recoveryChecks],
     ["assets", dataset.assets],
     ["signals", dataset.signals],
+    ["securityDetections", dataset.securityDetections],
+    ["exposureFindings", dataset.exposureFindings],
+    ["securityControls", dataset.securityControls],
     ["incidents", dataset.incidents],
     ["evidence", dataset.evidence],
     ["aiInvestigations", dataset.aiInvestigations],
@@ -126,6 +129,15 @@ export function validateDatasetIntegrity(dataset: TrustOpsDataset): TrustOpsData
     if (signal.assetId) {
       requireTenantReference(issues, signal, "asset", signal.assetId, assets);
     }
+  }
+
+  for (const detection of dataset.securityDetections) {
+    requireTenantReference(issues, detection, "signal", detection.signalId, signals);
+    requireTenantReference(issues, detection, "asset", detection.assetId, assets);
+  }
+
+  for (const finding of dataset.exposureFindings) {
+    requireTenantReference(issues, finding, "asset", finding.assetId, assets);
   }
 
   for (const incident of dataset.incidents) {
