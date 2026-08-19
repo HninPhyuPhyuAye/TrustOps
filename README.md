@@ -55,7 +55,8 @@ approval and runbook execution is recorded in an audit trail.
 
 ## Status
 
-Task 2 complete: the Next.js, TypeScript, and Tailwind foundation now includes a
-responsive command-centre shell and routes for SRE, SOC, incidents, AI analysis,
-approval-controlled automation, analytics, infrastructure, and audit evidence.
-Task 3 will add the multi-tenant domain model and realistic demonstration data.
+Task 3 complete: a validated, tenant-isolated domain now covers organisations,
+services, assets, SRE and SOC signals, incidents, explainable AI evidence,
+approvals, simulated automation, infrastructure posture, and audit events. See
+[the data model](docs/DATA_MODEL.md) for the boundary and scenario design. Task 4
+will connect this data to the company command centre and tenant switcher.
