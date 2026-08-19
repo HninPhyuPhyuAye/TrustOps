@@ -61,11 +61,12 @@ chargeable infrastructure is provisioned by default.
 
 ## Status
 
-Task 7 complete: TrustOps now joins SRE and SOC evidence into tenant-isolated
-incident cases with a chronological timeline, business blast radius, explicit
-counter-evidence, source-linked AI hypotheses, uncertainty, runbook retrieval,
-and stakeholder communication drafts. The analyst is deterministic simulated
-logic and cannot execute an action. See [the AI investigation contract](docs/AI_INVESTIGATION.md),
-[the cyber-monitoring model](docs/CYBER_MONITORING.md), [the observability model](docs/OBSERVABILITY.md),
-and [the data model](docs/DATA_MODEL.md). Task 8 will add approval-controlled
-automation, verification, and audit states.
+Task 8 complete: TrustOps now places a tenant and role policy gate between every
+AI-assisted runbook recommendation and a simulated execution. Authorised humans
+can approve or reject with rationale, approved demonstrations run through
+measured verification steps, and every decision and system transition appears
+in an export-ready, linked audit history. See [the automation safety model](docs/AUTOMATION_SAFETY.md),
+[the AI investigation contract](docs/AI_INVESTIGATION.md), [the cyber-monitoring model](docs/CYBER_MONITORING.md),
+[the observability model](docs/OBSERVABILITY.md), and [the data model](docs/DATA_MODEL.md).
+Task 9 will add engineering quality, Docker, CI, Terraform reference
+infrastructure, and operational documentation.

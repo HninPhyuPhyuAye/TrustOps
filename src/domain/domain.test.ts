@@ -1,6 +1,14 @@
 import { describe, expect, it } from "vitest";
 
 import { demoData } from "@/data/demo-data";
+import {
+  buildAuditChain,
+  buildAutomationCases,
+  demoAutomationActors,
+  evaluateApprovalPolicy,
+  summarizeAutomationCases,
+  verificationResultFor,
+} from "@/domain/automation";
 import { summarizeOrganization, summarizePortfolio } from "@/domain/dashboard";
 import { DatasetIntegrityError, validateDatasetIntegrity } from "@/domain/integrity";
 import {
@@ -88,6 +96,7 @@ describe("tenant-aware repository", () => {
       snapshot.aiInvestigations,
       snapshot.runbooks,
       snapshot.approvals,
+      snapshot.automationExecutions,
       snapshot.infrastructureResources,
       snapshot.auditEvents,
     ];
@@ -224,5 +233,75 @@ describe("incident and explainable AI correlation", () => {
     expect(summary.crossDomainIncidents).toBe(2);
     expect(summary.evidenceItems).toBe(6);
     expect(summary.meanAiConfidence).toBe(83);
+  });
+});
+
+describe("approval-controlled automation", () => {
+  it("joins each tenant approval to its incident, runbook, and execution", () => {
+    const northstar = repository.getOrganizationSnapshot(
+      mspOperator,
+      "org-northstar",
+    );
+    const [automationCase] = buildAutomationCases(northstar);
+
+    if (!automationCase) throw new Error("Expected Northstar automation case");
+    expect(automationCase.approval.status).toBe("APPROVED");
+    expect(automationCase.execution?.status).toBe("SUCCEEDED");
+    expect(automationCase.auditEvents).toHaveLength(2);
+    expect(verificationResultFor(automationCase.runbook)).toContain("sessions");
+  });
+
+  it("allows a scoped SRE analyst and blocks read-only or mismatched roles", () => {
+    const meridian = repository.getOrganizationSnapshot(mspOperator, "org-meridian");
+    const [automationCase] = buildAutomationCases(meridian);
+    const platformActor = demoAutomationActors.find(
+      (actor) => actor.role === "PLATFORM_OPERATOR",
+    );
+    const sreActor = demoAutomationActors.find(
+      (actor) => actor.role === "SRE_ANALYST",
+    );
+    const socActor = demoAutomationActors.find(
+      (actor) => actor.role === "SOC_ANALYST",
+    );
+    const auditor = demoAutomationActors.find((actor) => actor.role === "AUDITOR");
+
+    if (!automationCase || !platformActor || !sreActor || !socActor || !auditor) {
+      throw new Error("Expected automation policy fixtures");
+    }
+    expect(evaluateApprovalPolicy(platformActor, automationCase).allowed).toBe(true);
+    expect(evaluateApprovalPolicy(sreActor, automationCase).code).toBe(
+      "ALLOW_SRE_ACTION",
+    );
+    expect(evaluateApprovalPolicy(socActor, automationCase).code).toBe(
+      "DENY_ROLE_ACTION",
+    );
+    expect(evaluateApprovalPolicy(auditor, automationCase).code).toBe(
+      "DENY_READ_ONLY",
+    );
+  });
+
+  it("produces a deterministic linked audit sequence", () => {
+    const chain = buildAuditChain(demoData.auditEvents);
+
+    expect(chain).toHaveLength(4);
+    expect(chain[0]?.previousDigest).toBe("00000000");
+    expect(chain[1]?.previousDigest).toBe(chain[0]?.digest);
+    expect(buildAuditChain(demoData.auditEvents)).toEqual(chain);
+  });
+
+  it("summarises pending decisions and verified executions", () => {
+    const cases = repository
+      .listOrganizations(mspOperator)
+      .flatMap((organization) =>
+        buildAutomationCases(
+          repository.getOrganizationSnapshot(mspOperator, organization.id),
+        ),
+      );
+    const summary = summarizeAutomationCases(cases);
+
+    expect(summary.totalRequests).toBe(3);
+    expect(summary.pendingRequests).toBe(2);
+    expect(summary.approvedRequests).toBe(1);
+    expect(summary.successfulExecutions).toBe(1);
   });
 });
