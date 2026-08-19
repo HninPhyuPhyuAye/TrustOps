@@ -3,6 +3,10 @@ import { describe, expect, it } from "vitest";
 import { demoData } from "@/data/demo-data";
 import { summarizeOrganization, summarizePortfolio } from "@/domain/dashboard";
 import { DatasetIntegrityError, validateDatasetIntegrity } from "@/domain/integrity";
+import {
+  buildIncidentCases,
+  summarizeIncidentCases,
+} from "@/domain/incidents";
 import { trustOpsDatasetSchema } from "@/domain/schemas";
 import { summarizeSocWorkspace } from "@/domain/soc";
 import { calculateErrorBudgetBurn, summarizeSreWorkspace } from "@/domain/sre";
@@ -171,5 +175,54 @@ describe("SOC workspace calculations", () => {
     expect(summary.untriagedDetections).toBe(1);
     expect(summary.openFindings).toBe(2);
     expect(summary.averageControlCoverage).toBe(79);
+  });
+});
+
+describe("incident and explainable AI correlation", () => {
+  it("joins SRE and SOC evidence into one chronological tenant case", () => {
+    const meridian = repository.getOrganizationSnapshot(mspOperator, "org-meridian");
+    const [incidentCase] = buildIncidentCases(meridian);
+
+    if (!incidentCase) throw new Error("Expected Meridian incident case");
+    expect(incidentCase.domains).toEqual(["SRE", "SOC"]);
+    expect(incidentCase.timeline.map((item) => item.occurredAt)).toEqual(
+      [...incidentCase.timeline]
+        .sort((left, right) => left.occurredAt.localeCompare(right.occurredAt))
+        .map((item) => item.occurredAt),
+    );
+    expect(incidentCase.evidenceCoveragePercent).toBe(100);
+    expect(incidentCase.recommendedRunbook?.organizationId).toBe("org-meridian");
+  });
+
+  it("preserves counter-evidence and explicit AI limitations", () => {
+    const healthcare = repository.getOrganizationSnapshot(
+      healthcareAnalyst,
+      "org-harbourcare",
+    );
+    const [incidentCase] = buildIncidentCases(healthcare);
+
+    if (!incidentCase) throw new Error("Expected HarbourCare incident case");
+    expect(incidentCase.counterEvidenceCount).toBe(1);
+    expect(incidentCase.investigation?.limitations.length).toBeGreaterThan(0);
+    expect(incidentCase.stakeholderDraft).toContain(
+      "no automated action will run without approval",
+    );
+  });
+
+  it("summarises only incident cases supplied by the authorised scope", () => {
+    const cases = repository
+      .listOrganizations(mspOperator)
+      .flatMap((organization) =>
+        buildIncidentCases(
+          repository.getOrganizationSnapshot(mspOperator, organization.id),
+        ),
+      );
+    const summary = summarizeIncidentCases(cases);
+
+    expect(summary.totalIncidents).toBe(3);
+    expect(summary.activeIncidents).toBe(2);
+    expect(summary.crossDomainIncidents).toBe(2);
+    expect(summary.evidenceItems).toBe(6);
+    expect(summary.meanAiConfidence).toBe(83);
   });
 });

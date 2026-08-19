@@ -61,10 +61,11 @@ chargeable infrastructure is provisioned by default.
 
 ## Status
 
-Task 6 complete: the SOC workspace now fuses identity, endpoint, cloud, and
-network detections with analyst triage, MITRE-aligned context, attack paths,
-asset exposure, business impact, and preventive-control coverage. All security
-telemetry is deterministic demonstration data. See [the cyber-monitoring model](docs/CYBER_MONITORING.md),
-[the observability model](docs/OBSERVABILITY.md), and [the data model](docs/DATA_MODEL.md)
-for the operating logic and tenant boundary. Task 7 will turn the correlated
-evidence into incident investigations and explainable AI analysis.
+Task 7 complete: TrustOps now joins SRE and SOC evidence into tenant-isolated
+incident cases with a chronological timeline, business blast radius, explicit
+counter-evidence, source-linked AI hypotheses, uncertainty, runbook retrieval,
+and stakeholder communication drafts. The analyst is deterministic simulated
+logic and cannot execute an action. See [the AI investigation contract](docs/AI_INVESTIGATION.md),
+[the cyber-monitoring model](docs/CYBER_MONITORING.md), [the observability model](docs/OBSERVABILITY.md),
+and [the data model](docs/DATA_MODEL.md). Task 8 will add approval-controlled
+automation, verification, and audit states.
