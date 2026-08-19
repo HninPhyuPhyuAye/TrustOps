@@ -1,25 +1,52 @@
-# Dependencies
-node_modules/
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# Next.js and build output
-.next/
-out/
-dist/
-coverage/
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
 
-# Environment and secrets
-.env
-.env.*
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
 !.env.example
 
-# Editors and operating system
-.DS_Store
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# editors and local tooling
 .vscode/
 .idea/
-
-# Logs
-*.log
-npm-debug.log*
+.turbo/
+playwright-report/
+test-results/
 
 # Terraform local state and plans
 .terraform/
@@ -27,8 +54,3 @@ npm-debug.log*
 *.tfstate.*
 *.tfplan
 .terraform.lock.hcl
-
-# Local tooling
-.turbo/
-playwright-report/
-test-results/

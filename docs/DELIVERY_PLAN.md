@@ -79,6 +79,8 @@ observability platform. It is a credible architectural and workflow prototype.
 - Run formatting, tests, type checking, and the production build.
 - Perform desktop and mobile workflow verification.
 - Complete the README, architecture, threat model, runbook, and interview guide.
+- Add a Marketplace Position section covering buyers, users, industry packs,
+  differentiation, channels, and commercial model.
 - Capture screenshots and publish the repository.
 
 ## MVP acceptance criteria
