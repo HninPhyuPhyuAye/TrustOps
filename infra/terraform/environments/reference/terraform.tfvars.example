@@ -1,0 +1,21 @@
+# Copy to terraform.tfvars only after architecture, security, and cost review.
+# The committed defaults intentionally create no AWS resources.
+
+deployment_enabled = false
+cost_acknowledged  = false
+aws_region         = "ap-southeast-1"
+environment        = "reference"
+
+# For a reviewed deployment, use an immutable digest rather than a mutable tag.
+container_image = ""
+
+# Replace this public demonstration range with approved client networks or add TLS.
+allowed_ingress_cidrs = ["0.0.0.0/0"]
+
+database_multi_az = true
+
+additional_tags = {
+  Owner      = "platform-engineering"
+  CostCentre = "replace-before-deployment"
+  DataClass  = "synthetic-only"
+}

@@ -35,7 +35,7 @@ enough to connect to real collectors and cloud services later.
 See [docs/DELIVERY_PLAN.md](docs/DELIVERY_PLAN.md) for the detailed scope,
 acceptance criteria, and delivery order.
 
-## Planned stack
+## Engineering stack
 
 - Next.js App Router and React
 - TypeScript
@@ -46,6 +46,40 @@ acceptance criteria, and delivery order.
 - Vitest and Testing Library
 - Docker and GitHub Actions
 - Terraform reference architecture for AWS
+
+## Run locally
+
+Requirements: Node.js 24 and npm 11 or later.
+
+```bash
+cp .env.example .env.local
+npm ci
+npm run dev
+```
+
+Open `http://localhost:3000`. The operational health endpoint is available at
+`http://localhost:3000/api/health`.
+
+Run the full local quality gate with:
+
+```bash
+npm run verify
+npm audit --omit=dev --audit-level=high
+```
+
+## Run the production container
+
+With Docker Desktop running:
+
+```bash
+docker compose build
+docker compose up -d
+curl --fail http://localhost:3000/api/health
+```
+
+The multi-stage image runs the minimal Next.js standalone server as an
+unprivileged user. See the [container release runbook](docs/runbooks/CONTAINER_RELEASE.md)
+for verification and shutdown steps.
 
 ## Safety boundary
 
@@ -59,14 +93,27 @@ AWS integrations will be represented as reviewed Terraform infrastructure as
 code. The project will not depend on manually created console resources, and no
 chargeable infrastructure is provisioned by default.
 
+The reference configuration models VPC networking, ECS Fargate, ECR, an ALB,
+private encrypted RDS, CloudWatch, alarms, and least-privilege runtime roles. Both
+`deployment_enabled` and `cost_acknowledged` default to `false`; CI validates the
+configuration and never applies it. See [the AWS architecture](docs/AWS_ARCHITECTURE.md)
+and [safe Terraform instructions](infra/terraform/README.md).
+
+## Delivery evidence
+
+- [CI pipeline](docs/CI_PIPELINE.md)
+- [Security policy](SECURITY.md)
+- [Local development runbook](docs/runbooks/LOCAL_DEVELOPMENT.md)
+- [Incident response runbook](docs/runbooks/INCIDENT_RESPONSE.md)
+- [Terraform review runbook](docs/runbooks/TERRAFORM_REVIEW.md)
+- [Controlled teardown runbook](docs/runbooks/TEARDOWN.md)
+
 ## Status
 
-Task 8 complete: TrustOps now places a tenant and role policy gate between every
-AI-assisted runbook recommendation and a simulated execution. Authorised humans
-can approve or reject with rationale, approved demonstrations run through
-measured verification steps, and every decision and system transition appears
-in an export-ready, linked audit history. See [the automation safety model](docs/AUTOMATION_SAFETY.md),
-[the AI investigation contract](docs/AI_INVESTIGATION.md), [the cyber-monitoring model](docs/CYBER_MONITORING.md),
-[the observability model](docs/OBSERVABILITY.md), and [the data model](docs/DATA_MODEL.md).
-Task 9 will add engineering quality, Docker, CI, Terraform reference
-infrastructure, and operational documentation.
+Task 9 complete: TrustOps now has a production-style standalone container,
+operational health endpoint, automated application/container/Terraform quality
+gates, dependency update policy, disabled-by-default AWS reference modules, and
+documented development, release, incident, infrastructure-review, and teardown
+runbooks. The Terraform default produces a zero-resource plan and no AWS action
+is performed by CI. Task 10 will complete marketplace positioning, final
+portfolio evidence, the threat model, and interview handoff.

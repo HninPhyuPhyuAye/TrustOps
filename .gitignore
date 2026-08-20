@@ -54,3 +54,4 @@ test-results/
 *.tfstate.*
 *.tfplan
 .terraform.lock.hcl
+!infra/terraform/environments/reference/.terraform.lock.hcl

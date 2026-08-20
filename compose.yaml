@@ -1,0 +1,19 @@
+services:
+  trustops:
+    build:
+      context: .
+      target: runner
+    image: trustops:local
+    environment:
+      TRUSTOPS_DEPLOYMENT_ENV: container-demo
+    ports:
+      - "127.0.0.1:3000:3000"
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /app/.next/cache
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    restart: unless-stopped
