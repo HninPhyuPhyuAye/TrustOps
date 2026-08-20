@@ -682,7 +682,8 @@ export function IncidentWorkspace({
                     <div>
                       <p className="text-sm font-semibold text-ink">Approval required</p>
                       <p className="mt-1 text-xs leading-5 text-muted">
-                        Task 8 will add the decision and execution workflow.
+                        Open Automations to review the governed decision and
+                        execution workflow.
                       </p>
                     </div>
                   </div>

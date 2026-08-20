@@ -1,5 +1,7 @@
 # TrustOps AI
 
+[![CI](https://github.com/HninPhyuPhyuAye/TrustOps/actions/workflows/ci.yml/badge.svg)](https://github.com/HninPhyuPhyuAye/TrustOps/actions/workflows/ci.yml)
+
 TrustOps AI is a portfolio-grade, multi-tenant digital resilience platform for
 Singapore SMEs and managed service providers. It brings SRE observability, SOC
 monitoring, incident analysis, and human-approved automation into one command
@@ -26,9 +28,50 @@ an AI agent to make uncontrolled production changes.
 - Private healthcare
 - Professional services
 
+## Demonstrated workflow
+
+```text
+Tenant-scoped telemetry
+  -> correlated SRE + SOC incident
+  -> evidence-linked simulated AI investigation
+  -> role and tenant policy evaluation
+  -> human approval or rejection
+  -> controlled runbook simulation
+  -> recovery verification + audit evidence
+```
+
+## Product tour
+
+| Workspace | What it demonstrates |
+| --- | --- |
+| Command centre | Cross-company MSP posture with isolated tenant drill-down |
+| SRE | Golden signals, SLO burn, deployments, logs, traces, and readiness |
+| SOC | Identity, endpoint, cloud, network, MITRE, exposure, and controls |
+| Incidents and AI | Correlated timeline, cited hypothesis, uncertainty, and blast radius |
+| Automations | Role/tenant policy, written human decision, safe simulation, verification |
+| Audit and infrastructure | Attributed event chain and full-cloud architecture visibility |
+
+## Release screenshots
+
+### Multi-tenant command centre
+
+![TrustOps multi-tenant command centre](docs/screenshots/command-centre-desktop.png)
+
+### Evidence-backed AI investigation
+
+![TrustOps evidence-backed AI investigation](docs/screenshots/ai-investigation-desktop.png)
+
+### Approval-controlled automation
+
+![TrustOps governed automation with verified recovery](docs/screenshots/automation-approved-desktop.png)
+
+### Responsive mobile view
+
+<img src="docs/screenshots/command-centre-mobile.png" alt="TrustOps responsive mobile command centre" width="390">
+
 ## Two-day MVP
 
-The two-day build is an intentionally focused demonstration. It will simulate
+The two-day build is an intentionally focused demonstration. It simulates
 realistic telemetry and response workflows while keeping the interfaces clean
 enough to connect to real collectors and cloud services later.
 
@@ -101,19 +144,33 @@ and [safe Terraform instructions](infra/terraform/README.md).
 
 ## Delivery evidence
 
+- [Marketplace position](docs/MARKETPLACE_POSITION.md)
+- [Portfolio case study](docs/PORTFOLIO_CASE_STUDY.md)
+- [Interview and demonstration guide](docs/INTERVIEW_GUIDE.md)
+- [Threat model](docs/THREAT_MODEL.md)
+- [AWS reference architecture](docs/AWS_ARCHITECTURE.md)
+- [AI investigation contract](docs/AI_INVESTIGATION.md)
+- [Automation safety model](docs/AUTOMATION_SAFETY.md)
 - [CI pipeline](docs/CI_PIPELINE.md)
 - [Security policy](SECURITY.md)
 - [Local development runbook](docs/runbooks/LOCAL_DEVELOPMENT.md)
 - [Incident response runbook](docs/runbooks/INCIDENT_RESPONSE.md)
 - [Terraform review runbook](docs/runbooks/TERRAFORM_REVIEW.md)
 - [Controlled teardown runbook](docs/runbooks/TEARDOWN.md)
+- [Release checklist](docs/RELEASE_CHECKLIST.md)
+
+## Portfolio safety statement
+
+TrustOps uses fixed synthetic telemetry and deterministic simulated AI output.
+It does not connect to customer systems, call a live model, or execute real
+infrastructure changes. The production evolution and residual risks are stated
+explicitly in the threat model and architecture documents.
 
 ## Status
 
-Task 9 complete: TrustOps now has a production-style standalone container,
-operational health endpoint, automated application/container/Terraform quality
-gates, dependency update policy, disabled-by-default AWS reference modules, and
-documented development, release, incident, infrastructure-review, and teardown
-runbooks. The Terraform default produces a zero-resource plan and no AWS action
-is performed by CI. Task 10 will complete marketplace positioning, final
-portfolio evidence, the threat model, and interview handoff.
+Tasks 1–10 complete. TrustOps is an interview-ready portfolio release with the
+full multi-tenant SRE/SOC workflow, explainable AI safety contract,
+approval-controlled automation, hardened delivery path, threat model,
+marketplace position, interview handoff, and reproducible infrastructure
+reference. The Terraform default produces a zero-resource plan and no AWS
+resource is required to demonstrate the application.
