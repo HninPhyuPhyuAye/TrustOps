@@ -21,7 +21,8 @@ run is recorded after the release commit is pushed.
 - [x] High/critical container vulnerability scan
 - [x] Terraform formatting, initialisation, and validation
 - [x] Offline Terraform plan reports `SAFE_ZERO_RESOURCE_CONFIGURATION`
-- [ ] GitHub Actions passes on the release commit
+- [x] GitHub Actions passes on the release commit
+  ([run 32340812926](https://github.com/HninPhyuPhyuAye/TrustOps/actions/runs/32340812926))
 
 ## Portfolio evidence
 
