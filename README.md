@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/HninPhyuPhyuAye/TrustOps/actions/workflows/ci.yml/badge.svg)](https://github.com/HninPhyuPhyuAye/TrustOps/actions/workflows/ci.yml)
 
-TrustOps AI is a portfolio-grade, multi-tenant digital resilience platform for
+TrustOps AI is a multi-tenant digital resilience platform for
 Singapore SMEs and managed service providers. It brings SRE observability, SOC
 monitoring, incident analysis, and human-approved automation into one command
 centre.
